@@ -10,6 +10,12 @@ Build status and test coverage
 [![build-status](https://travis-ci.org/ishxiao/aps.svg?branch=master)](http://travis-ci.org/ishxiao/aps)
 [![Coverage Status](https://img.shields.io/coveralls/ishxiao/zhihu.svg)](https://coveralls.io/r/ishxiao/aps)
 
+Documentation [![Inline docs](http://inch-ci.org/github/ishxiao/aps.svg?branch=master)](http://inch-ci.org/github/ishxiao/aps)
+--------------
+
+[user guide](https://github.com/ishxiao/aps/blob/master/README.md)
+
+
 Installers [![Anaconda-Server Badge](https://anaconda.org/ishxiao/aps/badges/version.svg)](https://anaconda.org/ishxiao/aps)
 ----------
 
