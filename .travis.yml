@@ -23,9 +23,7 @@ addons:
             - libatlas-dev
             - libatlas-base-dev
             - liblapack-dev
-python:
-    - 3.6
-    - nightly
+
 # command to install dependencies
 install:
     - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -52,7 +50,7 @@ install:
     - pip install scs
     - pip install cvxpy
     # Finally, install ourselves.
-    - python setup.py install
+    - python setup.py install;
 
 # change dir
 brefore_script:
