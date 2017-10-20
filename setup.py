@@ -13,7 +13,7 @@ from setuptools import setup
 setup(name='aps',
       version='0.0.0',
       description='APS Journals API in Python for Humans.',
-      url='http://github.com/ishxiao/aps',
+      url='https://github.com/ishxiao/aps',
       author='Xiao Shang',
       author_email='me@ishxiao.com',
       license='MIT',
