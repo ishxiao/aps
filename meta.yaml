@@ -1,0 +1,41 @@
+{% set name = "aps" %}
+{% set version = "0.0.0" %}
+{% set file_ext = "tar.gz" %}
+{% set hash_type = "sha256" %}
+{% set hash_value = "474d10cf434e0930182a3f7fd0e61dfd1503e5c0ebb5cc15b0d6c79583b536c7" %}
+
+package:
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
+
+source:
+  fn: '{{ name }}-{{ version }}.{{ file_ext }}'
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.{{ file_ext }}
+  '{{ hash_type }}': '{{ hash_value }}'
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+
+test:
+  imports:
+    - aps
+
+about:
+  home: http://github.com/ishxiao/aps
+  license: MIT
+  license_family: MIT
+  license_file: ''
+  summary: APS Journals API in Python for Humans.
+  description: ''
+  doc_url: ''
+  dev_url: ''
+
+extra:
+  recipe-maintainers: ''
