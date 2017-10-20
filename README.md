@@ -8,7 +8,7 @@ Build status and test coverage
 ------------------------------
 
 [![build-status](https://travis-ci.org/ishxiao/aps.svg?branch=master)](http://travis-ci.org/ishxiao/aps)
-[![Coverage Status](https://img.shields.io/coveralls/ishxiao/zhihu.svg)](https://coveralls.io/r/ishxiao/aps)
+[![Coverage Status](https://coveralls.io/repos/github/ishxiao/aps/badge.svg)](https://coveralls.io/github/ishxiao/aps)
 
 Documentation [![Inline docs](http://inch-ci.org/github/ishxiao/aps.svg?branch=master)](http://inch-ci.org/github/ishxiao/aps)
 --------------
