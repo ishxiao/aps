@@ -1,14 +1,13 @@
 # aps
 
-[Xiao Shang](http://github.com/ishxiao)
+[![Author](https://img.shields.io/badge/Author-ishxiao-blue.svg "Author")](https://github.com/ishxiao "Author")
 
 APS Journals API in Python for Humans™: https://www.aps.org/publications/journals/index.cfm
 
 Build status and test coverage
 ------------------------------
 
-[![build-status](https://travis-ci.org/ishxiao/aps.svg?branch=master)](http://travis-ci.org/ishxiao/aps)
-[![Coverage Status](https://coveralls.io/repos/github/ishxiao/aps/badge.svg)](https://coveralls.io/github/ishxiao/aps)
+[![Build Status](https://github.com/ishxiao/aps/workflows/Build/badge.svg)](https://github.com/ishxiao/aps/actions?query=workflow%3ABuild)
 
 Documentation [![Inline docs](http://inch-ci.org/github/ishxiao/aps.svg?branch=master)](http://inch-ci.org/github/ishxiao/aps)
 --------------
@@ -59,7 +58,6 @@ aps/
 │   └── testing.py
 ├── .coveragerc
 ├── .gitignore
-├── .travis.yml
 ├── LICENSE
 ├── MANIFEST.in
 ├── README.md
