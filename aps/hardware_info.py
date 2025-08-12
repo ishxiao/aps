@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 20 15:25:29 2017
+Updated on Aug 12 2025 — Improved cross-platform CPU/memory detection.
 
 @author: ishxiao
 ~Email~: me@ishxiao.com
@@ -13,90 +14,98 @@ __all__ = ['hardware_info']
 import os
 import sys
 import multiprocessing
+import platform
 
 def _mac_hardware_info():
-    info = dict()
-    results = dict()
-    for l in [l.split(':') for l in os.popen('sysctl hw').readlines()[1:]]:
-        info[l[0].strip(' "').replace(' ', '_').lower().strip('hw.')] = \
-            l[1].strip('.\n ')
-    results.update({'cpus': int(info['physicalcpu'])})
-    results.update({'cpu_freq': int(float(os.popen('sysctl -n machdep.cpu.brand_string')
-                                .readlines()[0].split('@')[1][:-4])*1000)})
-    results.update({'memsize': int(int(info['memsize']) / (1024 ** 2))})
-    # add OS information
-    results.update({'os': 'Mac OSX'})
+    results = {}
+    try:
+        info = {}
+        for l in [l.split(':') for l in os.popen('sysctl hw').readlines()[1:]]:
+            info[l[0].strip(' "').replace(' ', '_').lower().strip('hw.')] = \
+                l[1].strip('.\n ')
+        results['cpus'] = int(info.get('physicalcpu', os.cpu_count() or 0))
+        try:
+            freq_str = os.popen('sysctl -n machdep.cpu.brand_string').read()
+            if '@' in freq_str:
+                mhz = float(freq_str.split('@')[1][:-4]) * 1000
+                results['cpu_freq'] = mhz
+        except:
+            pass
+        results['memsize'] = int(int(info.get('memsize', 0)) / (1024 ** 2))
+        results['os'] = 'Mac OSX'
+    except Exception:
+        results['cpus'] = os.cpu_count() or 'Unknown'
     return results
 
 
 def _linux_hardware_info():
     results = {}
-    # get cpu number
-    cpu_info = dict()
-    for l in [l.split(':') for l in os.popen('lscpu').readlines()]:
-        cpu_info[l[0]] = l[1].strip('.\n ').strip('kB')
-    sockets = int(cpu_info['Socket(s)'])
-    cores_per_socket = int(cpu_info['Core(s) per socket'])
-    results.update({'cpus': sockets * cores_per_socket})
-    # get cpu frequency directly (bypasses freq scaling)
     try:
-        file = "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
-        cpu_freq = open(file).readlines()[0]
-        cpu_freq = float(cpu_freq.strip('\n'))
-        results.update({'cpu_freq': cpu_freq / (1000. ** 2)})
-    except:
-        cpu_freq = float(cpu_info['CPU MHz']) / 1000.
-        results.update({'cpu_freq': cpu_freq})
+        cpu_info = {}
+        for l in [l.split(':') for l in os.popen('lscpu').readlines() if ':' in l]:
+            cpu_info[l[0].strip()] = l[1].strip()
+        sockets = int(cpu_info.get('Socket(s)', 1))
+        cores_per_socket = int(cpu_info.get('Core(s) per socket', os.cpu_count() or 1))
+        results['cpus'] = sockets * cores_per_socket or os.cpu_count() or 'Unknown'
 
-    # get total amount of memory
-    mem_info = dict()
-    for l in [l.split(':') for l in open("/proc/meminfo").readlines()]:
-        mem_info[l[0]] = l[1].strip('.\n ').strip('kB')
-    results.update({'memsize': int(mem_info['MemTotal']) / 1024})
-    # add OS information
-    results.update({'os': 'Linux'})
+        try:
+            with open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq") as f:
+                cpu_freq = float(f.read().strip())
+                results['cpu_freq'] = cpu_freq / 1e6
+        except:
+            mhz = float(cpu_info.get('CPU MHz', 0))
+            results['cpu_freq'] = mhz / 1000 if mhz else 'Unknown'
+
+        try:
+            mem_info = {}
+            for l in [l.split(':') for l in open("/proc/meminfo").readlines()]:
+                mem_info[l[0]] = l[1].strip().strip('kB')
+            results['memsize'] = int(mem_info.get('MemTotal', 0)) / 1024
+        except:
+            results['memsize'] = 'Unknown'
+
+        results['os'] = 'Linux'
+    except Exception:
+        results['cpus'] = os.cpu_count() or 'Unknown'
     return results
 
 
 def _win_hardware_info():
+    results = {}
     try:
         from comtypes.client import CoGetObject
-        winmgmts_root = CoGetObject("winmgmts:root\cimv2")
+        winmgmts_root = CoGetObject(r"winmgmts:root\cimv2")
         cpus = winmgmts_root.ExecQuery("Select * from Win32_Processor")
-        ncpus = 0
-        for cpu in cpus:
-            ncpus += int(cpu.Properties_['NumberOfCores'].Value)
+        ncpus = sum(int(cpu.Properties_['NumberOfCores'].Value) for cpu in cpus)
+        results['cpus'] = ncpus
     except:
-        ncpus = int(multiprocessing.cpu_count())
-    return {'os': 'Windows', 'cpus': ncpus}
+        results['cpus'] = multiprocessing.cpu_count()
+    results['os'] = 'Windows'
+    return results
 
 
 def hardware_info():
     """
-    Returns basic hardware information about the computer.
-
-    Gives actual number of CPU's in the machine, even when hyperthreading is
-    turned on.
-
-    Returns
-    -------
-    info : dict
-        Dictionary containing cpu and memory information.
-
+    Returns basic hardware information (CPUs, frequency, memory, OS) in a dictionary.
+    Cross-platform and robust against missing system commands or keys.
     """
     try:
         if sys.platform == 'darwin':
             out = _mac_hardware_info()
         elif sys.platform == 'win32':
             out = _win_hardware_info()
-        elif sys.platform in ['linux', 'linux2']:
+        elif sys.platform.startswith('linux'):
             out = _linux_hardware_info()
         else:
             out = {}
-    except:
-        return {}
-    else:
-        return out
+    except Exception:
+        out = {}
+
+    # Always ensure at least 'cpus' key exists
+    if 'cpus' not in out:
+        out['cpus'] = os.cpu_count() or 'Unknown'
+    return out
+
 
 if __name__ == '__main__':
     print(hardware_info())
